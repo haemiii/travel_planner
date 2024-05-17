@@ -1,0 +1,6 @@
+rootProject.name = 'travel-planner'
+include 'travel-planner-api'
+include 'travel-planner-domain'
+include 'travel-planner-service'
+include 'travel-planner-repository'
+

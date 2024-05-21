@@ -10,23 +10,30 @@ plugins {
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
-java {
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'org.springframework.boot'
+
 	sourceCompatibility = '17'
+
+	// 저장소 :라이브러리를 다운로드하는 저장소
+	repositories {
+		mavenCentral()
+	}
+
+	// 외부 라이브러리, 모듈 : 빌드할때 gradle이 자동으로 다운로드한다.
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter'
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	}
+
+	// 프로젝트내에 존재하는 'test' 태스크를 참조하여 설정 추가
+	tasks.named('test') {
+		useJUnitPlatform()
+	}
 }
 
-// 저장소 :라이브러리를 다운로드하는 저장소
-repositories {
-	mavenCentral()
-}
 
-// 외부 라이브러리, 모듈 : 빌드할때 gradle이 자동으로 다운로드한다.
-dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
 
-// 프로젝트내에 존재하는 'test' 태스크를 참조하여 설정 추가
-tasks.named('test') {
-	useJUnitPlatform()
-}

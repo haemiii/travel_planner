@@ -1,13 +1,18 @@
 package com.example.controller;
 
+import com.example.DayPlan;
 import com.example.TravelPlan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
@@ -19,9 +24,12 @@ public class PlanController {
 
     @PostMapping("/create")
     public ResponseEntity<TravelPlan> createPlan(@RequestBody TravelPlan travelPlan){
-        travelPlan.setDayPlanList(travelPlan.getStart_date(), travelPlan.getEnd_date());
+        travelPlan.setId(id.getAndIncrement());
+
+        List<DayPlan> dayPlans = generateDayPlans(travelPlan.getStart_date(), travelPlan.getEnd_date());
+        travelPlan.setDayPlanList(dayPlans);
         // travelPlan 저장 로직 추가 예정
-        plans.put(id.getAndIncrement(), travelPlan);
+        plans.put(travelPlan.getId(), travelPlan);
         return new ResponseEntity<>(travelPlan, HttpStatus.CREATED);
     }
 
@@ -37,5 +45,19 @@ public class PlanController {
         TravelPlan travelPlan = plans.get(id);
         return new ResponseEntity<>(travelPlan, HttpStatus.OK);
     }
+    private List<DayPlan> generateDayPlans(LocalDate startDate, LocalDate endDate) {
+        List<DayPlan> dayPlans = new CopyOnWriteArrayList<>();
+        LocalDate currentDate = startDate;
+
+        while (!currentDate.isAfter(endDate)){
+            DayPlan dayPlan = new DayPlan();
+            dayPlan.setDate(currentDate);
+
+            dayPlans.add(dayPlan);
+            currentDate = currentDate.plusDays(1);
+        }
+        return dayPlans;
+    }
+
 
 }

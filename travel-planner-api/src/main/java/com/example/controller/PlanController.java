@@ -21,6 +21,7 @@ public class PlanController {
 
     private Map<Long, TravelPlan> plans = new ConcurrentHashMap<>();
     private AtomicLong id = new AtomicLong(1);
+    private AtomicLong dayPlanId = new AtomicLong(1);
 
     @PostMapping("/create")
     public ResponseEntity<TravelPlan> createPlan(@RequestBody TravelPlan travelPlan){
@@ -34,9 +35,9 @@ public class PlanController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<Long, TravelPlan>> getAllPlans(){
+    public ResponseEntity<List<TravelPlan>> getAllPlans(){
 
-        return new ResponseEntity<>(plans, HttpStatus.OK);
+        return new ResponseEntity<>(new ArrayList<>(plans.values()), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -51,11 +52,13 @@ public class PlanController {
 
         while (!currentDate.isAfter(endDate)){
             DayPlan dayPlan = new DayPlan();
+            dayPlan.setId(dayPlanId.getAndIncrement());
             dayPlan.setDate(currentDate);
 
             dayPlans.add(dayPlan);
             currentDate = currentDate.plusDays(1);
         }
+        dayPlanId.set(1);
         return dayPlans;
     }
 

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +26,7 @@ public class PlanController {
     public ResponseEntity<TravelPlan> createPlan(@RequestBody TravelPlan travelPlan){
         travelPlan.setId(id.getAndIncrement());
 
-        List<DayPlan> dayPlans = generateDayPlans(travelPlan.getStart_date(), travelPlan.getEnd_date());
+        List<DayPlan> dayPlans = generateDayPlans(travelPlan.getStartDate(), travelPlan.getEndDate());
         travelPlan.setDayPlanList(dayPlans);
         // travelPlan 저장 로직 추가 예정
         plans.put(travelPlan.getId(), travelPlan);

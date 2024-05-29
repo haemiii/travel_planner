@@ -13,6 +13,7 @@ dependencies {
     implementation project(':travel-planner-service')
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

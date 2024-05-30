@@ -7,6 +7,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter @Setter
 public class TravelPlan{
@@ -18,14 +19,14 @@ public class TravelPlan{
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
-    private List<DayPlan> dayPlanList;
+    private Map<LocalDate, DayPlan> dayPlanList;
 
     public TravelPlan(){}
 
-    public TravelPlan(String name, LocalDate start_date, LocalDate end_date) {
+    public TravelPlan(String name, LocalDate startDate, LocalDate endDate) {
         this.name = name;
-        this.startDate = start_date;
-        this.endDate = end_date;
+        this.startDate = startDate;
+        this.endDate = endDate;
 //        this.dayPlanList = generateDayPlans(start_date, end_date);
     }
     @Override
@@ -33,8 +34,8 @@ public class TravelPlan{
         return "TravelPlan{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", start_date=" + startDate +
-                ", end_date=" + endDate +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
                 ", dayPlanList=" + dayPlanList +
                 '}';
     }

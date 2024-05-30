@@ -35,22 +35,7 @@ public class PlanController {
         plans.put(travelPlan.getId(), travelPlan);
         return new ResponseEntity<>(travelPlan, HttpStatus.CREATED);
     }
-
-    @GetMapping
-    public ResponseEntity<List<TravelPlan>> getAllPlans(){
-
-        return new ResponseEntity<>(new ArrayList<>(plans.values()), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<TravelPlan> getPlanById(@PathVariable Long id){
-
-        TravelPlan travelPlan = plans.get(id);
-        return new ResponseEntity<>(travelPlan, HttpStatus.OK);
-    }
-
-
-    @PostMapping("/{id}/{date}")
+    @PostMapping("/{id}/days/{date}/locations")
     public ResponseEntity<List<Location>> addPlace(@PathVariable Long id, @PathVariable String date, @RequestBody Location location){
         LocalDate localDate = LocalDate.parse(date);
         // date에 해당하는 location 추가!
@@ -60,7 +45,18 @@ public class PlanController {
         return new ResponseEntity<>(locationList, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}/{date}")
+    @GetMapping
+    public ResponseEntity<List<TravelPlan>> getAllPlans(){
+
+        return new ResponseEntity<>(new ArrayList<>(plans.values()), HttpStatus.OK);
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<TravelPlan> getPlanById(@PathVariable Long id){
+
+        TravelPlan travelPlan = plans.get(id);
+        return new ResponseEntity<>(travelPlan, HttpStatus.OK);
+    }
+    @GetMapping("/{id}/days/{date}")
     public ResponseEntity<List<Location>> getDayPlan(@PathVariable Long id, @PathVariable String date){
         LocalDate localDate = LocalDate.parse(date);
         // date에 해당하는 dayPlan 반환

@@ -1,6 +1,10 @@
 package com.example.controller;
 
+import com.example.DayPlan;
+import com.example.Location;
 import com.example.TravelPlan;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +15,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,29 +30,42 @@ class PlanControllerTest {
 
     private TravelPlan firstPlan;
     private TravelPlan secondPlan;
-
+    private Location firstPlace;
+    private Location secondPlace;
+    private Location thirdPlace;
 
     @BeforeEach
-    public void setUp(){
-        firstPlan = new TravelPlan();
-        firstPlan.setName("first plan");
-        firstPlan.setStartDate(LocalDate.of(2024, 6, 1));
-        firstPlan.setEndDate(LocalDate.of(2024, 6, 3));
+    public void setUp() {
+        testRestTemplate.delete("/plans");
 
-        secondPlan = new TravelPlan();
-        secondPlan.setName("second plan");
-        secondPlan.setStartDate(LocalDate.of(2024, 6, 10));
-        secondPlan.setEndDate(LocalDate.of(2024, 6, 13));
+        firstPlan = createTravelPlan("first plan", LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 3));
+        secondPlan = createTravelPlan("second plan", LocalDate.of(2024, 10, 10), LocalDate.of(2024, 10, 13));
 
+        firstPlace = createLocation("광화문", 37.5723, 126.979);
+        secondPlace = createLocation("경복궁", 37.5797, 126.9769);
+        thirdPlace = createLocation("남산타워", 37.5511, 126.9882);
+    }
+
+    private TravelPlan createTravelPlan(String name, LocalDate startDate, LocalDate endDate) {
+        TravelPlan travelPlan = new TravelPlan();
+        travelPlan.setName(name);
+        travelPlan.setStartDate(startDate);
+        travelPlan.setEndDate(endDate);
+        return travelPlan;
+    }
+
+    private Location createLocation(String name, double latitude, double longitude) {
+        Location location = new Location();
+        location.setName(name);
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        return location;
     }
 
     @Test
     @DisplayName("일정 생성 테스트")
     public void testCreatePlan() throws Exception{
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//        HttpEntity<String> request = new HttpEntity<>(objectMapper.writeValueAsString(firstPlan), headers);
+
         ResponseEntity<String> response =  testRestTemplate.postForEntity("/plans/create", firstPlan, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
@@ -74,5 +93,36 @@ class PlanControllerTest {
         assertThat(travelPlan1.getDayPlanList()).hasSize(3);
         assertThat(travelPlan2.getName()).isEqualTo("second plan");
         assertThat(travelPlan2.getDayPlanList()).hasSize(4);
+    }
+
+    @Test
+    @DisplayName("여행 장소 추가")
+    public void postLocation() throws Exception {
+        ResponseEntity<TravelPlan> response = testRestTemplate.postForEntity("/plans/create", firstPlan, TravelPlan.class);
+
+        ResponseEntity<String> response1 = testRestTemplate.postForEntity("/plans/{id}/days/{date}/locations", firstPlace, String.class, 1, "2024-06-01");
+        ResponseEntity<String> response2 = testRestTemplate.postForEntity("/plans/{id}/days/{date}/locations", secondPlace, String.class, 1, "2024-06-01");
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        List<Location> locations = objectMapper.readValue(response2.getBody(), List.class);
+        assertThat(locations).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("여행 일자에 해당하는 장소 반환")
+    public void getLocationByDate() throws Exception{
+        ResponseEntity<TravelPlan> response = testRestTemplate.postForEntity("/plans/create", firstPlan, TravelPlan.class);
+
+        ResponseEntity<String> response1 = testRestTemplate.postForEntity("/plans/{id}/days/{date}/locations", firstPlace, String.class, 1, "2024-06-01");
+        ResponseEntity<String> response2 = testRestTemplate.postForEntity("/plans/{id}/days/{date}/locations", secondPlace, String.class, 1, "2024-06-01");
+        ResponseEntity<String> response3 = testRestTemplate.postForEntity("/plans/{id}/days/{date}/locations", thirdPlace, String.class, 1, "2024-06-02");
+
+        ResponseEntity<String> getResponse = testRestTemplate.getForEntity("/plans/{id}/days/{date}", String.class, 1, "2024-06-01");
+        List<Location> locations = objectMapper.readValue(getResponse.getBody(), List.class);
+        ResponseEntity<String> getResponse2 = testRestTemplate.getForEntity("/plans/{id}/days/{date}", String.class, 1, "2024-06-02");
+        List<Location> locations2 = objectMapper.readValue(getResponse2.getBody(), List.class);
+
+        assertThat(locations).hasSize(2);
+        assertThat(locations2).hasSize(1);
     }
 }
